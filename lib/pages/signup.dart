@@ -3,112 +3,153 @@ import 'package:flutter/material.dart';
 
 class SignUp extends StatefulWidget {
   final void Function()? onPressed;
-  const SignUp({super.key, required this.onPressed}) ;
+
+  const SignUp({Key? key, required this.onPressed}) : super(key: key);
+
   @override
   State<SignUp> createState() => _SignUpState();
 }
+
 class _SignUpState extends State<SignUp> {
-  final _formKey=GlobalKey<FormState>();
-  final TextEditingController _email=TextEditingController();
-  final TextEditingController _password=TextEditingController();
-  bool isLoading=false;
-  createUserWithEmailAndPassword()async{
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  bool isLoading = false;
+  bool _obscureText = true;
+
+  createUserWithEmailAndPassword() async {
     try {
       setState(() {
-        isLoading=true;
+        isLoading = true;
       });
-     await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _email.text,
         password: _password.text,
       );
       setState(() {
-        isLoading=false;
+        isLoading = false;
       });
     } on FirebaseAuthException catch (e) {
       setState(() {
-        isLoading=false;
+        isLoading = false;
       });
       if (e.code == 'weak-password') {
-        return ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('weak Password'),
-            )
-        );      } else if (e.code == 'email-already-in-use') {
-        return ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Email already exist'),
-            )
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Weak Password'),
+          ),
+        );
+      } else if (e.code == 'email-already-in-use') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Email already exists'),
+          ),
         );
       }
     } catch (e) {
       print(e);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('SignUp',style: TextStyle(color: Colors.white),),centerTitle: true,backgroundColor: Colors.blue,),
+      appBar: AppBar(
+        title: Text(
+          'SignUp',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
+      ),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(20.0),
-          child:SingleChildScrollView(
-
-          child: Form(
-            key: _formKey,
-            child: OverflowBar(
-              overflowSpacing: 20,
-              children: [
-                TextFormField(
-                  controller: _email,
-                  validator: (text){
-                    if(text==null || text.isEmpty){
-                      return "Email can't be empty";
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(labelText: "Enter Email",border: OutlineInputBorder(),prefixIcon: Icon(Icons.lock),),
-                ),
-                TextFormField(
-                  obscureText: true,
-                  controller: _password,
-                  validator: (text){
-                    if(text==null || text.isEmpty){
-                      return "Password can't be empty";
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(labelText: "Enter Password",border: OutlineInputBorder(),prefixIcon: Icon(Icons.lock),),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 45,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue, // background color
-                      foregroundColor: Colors.white, // text color
-                    ),
-                    onPressed: (){
-                      if(_formKey.currentState!.validate()){
-                        createUserWithEmailAndPassword();
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _email,
+                    validator: (text) {
+                      if (text == null || text.isEmpty) {
+                        return "Email can't be empty";
                       }
+                      return null;
                     },
-                    child:isLoading
-                        ? const Center(child: CircularProgressIndicator(color: Colors.white,),)
-                        : const Text('Register'),                  ),
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Aleady have an acc? ',style: TextStyle(fontSize: 16),
+                    decoration: const InputDecoration(
+                      labelText: "Enter Email",
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email),
                     ),
-                    TextButton(
-                        onPressed: widget.onPressed
-                        , child: Text('Login')),
-                  ],
-                ),
-              ],
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    obscureText: _obscureText,
+                    validator: (text) {
+                      if (text == null || text.isEmpty) {
+                        return "Password can't be empty";
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: "Enter Password",
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                      suffixIcon: Container(
+                        height: 55, // Adjusted height
+                        child: IconButton(
+                          icon: Icon(
+                            _obscureText
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55, // Adjusted height
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          createUserWithEmailAndPassword();
+                        }
+                      },
+                      child: isLoading
+                          ? Center(child: CircularProgressIndicator(color: Colors.white))
+                          : Text('Register'),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Already have an account? ',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      TextButton(
+                        onPressed: widget.onPressed,
+                        child: Text('Login'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        )
         ),
       ),
     );

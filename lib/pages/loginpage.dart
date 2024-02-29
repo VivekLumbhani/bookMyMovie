@@ -1,22 +1,24 @@
-import 'package:bookmymovie/pages/signup.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 
 class LoginPage extends StatefulWidget {
   final void Function()? onPressed;
 
-  const LoginPage({super.key, required this.onPressed});
+  const LoginPage({Key? key, required this.onPressed}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
+
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   bool isLoading = false;
+  bool _obscureText = true;
+
 
   signInWithEmailAndPassword() async {
     try {
@@ -47,33 +49,26 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login Page', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-      ),
       body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child:SingleChildScrollView(
-
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Center items vertically
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('images/profile.png', width: 100, height: 100,),
+              Image.asset(
+                'images/profile.png',
+                width: 100,
+                height: 100,
+              ),
               SizedBox(height: 20),
               Form(
                 key: _formKey,
-                child: OverflowBar(
-                  overflowSpacing: 20,
+                child: Column(
                   children: [
                     TextFormField(
                       controller: _email,
-
                       validator: (text) {
                         if (text == null || text.isEmpty) {
                           return "Email can't be empty";
@@ -87,23 +82,42 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     TextFormField(
-                      obscureText: true,
                       controller: _password,
-                      validator: (text) {
-                        if (text == null || text.isEmpty) {
-                          return "Password can't be empty";
+                      obscureText: _obscureText,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: Icon(Icons.email, color: Colors.black),
+                        suffixIcon: SizedBox(
+                          height: 40,
+                          child: IconButton(
+                            icon: Icon(
+                              _obscureText
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureText = !_obscureText;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
                         }
                         return null;
                       },
-                      decoration: const InputDecoration(labelText: "Enter Password",border: OutlineInputBorder(),prefixIcon: Icon(Icons.lock),),
                     ),
                     SizedBox(
                       width: double.infinity,
                       height: 45,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue, // background color
-                          foregroundColor: Colors.white, // text color
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
@@ -119,15 +133,21 @@ class _LoginPageState extends State<LoginPage> {
                             : const Text('Login'),
                       ),
                     ),
+                    SizedBox(height: 5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('already have an acc? ',style: TextStyle(fontSize: 16),
+                        Text(
+                          'already have an acc? ',
+                          style: TextStyle(fontSize: 16),
                         ),
-                        TextButton(onPressed: () {
-                          widget.onPressed?.call(); // Call the onPressed function
-                          print('object');
-                        }, child: Text('signUp')),
+                        TextButton(
+                          onPressed: () {
+                            widget.onPressed?.call();
+                            print('object');
+                          },
+                          child: Text('signUp'),
+                        ),
                       ],
                     ),
                   ],
@@ -135,10 +155,9 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-        )
-
         ),
       ),
     );
   }
+
 }
